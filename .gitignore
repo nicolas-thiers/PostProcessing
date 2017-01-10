@@ -1,3 +1,6 @@
 *.csv
 *.fld*
 .ipynb_checkpoints
+*.eps
+*.out
+*.in
