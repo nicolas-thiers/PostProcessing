@@ -1,12 +1,24 @@
 import sys 
 import os
-path = "/home/nicolas/Dropbox/Doctorado/PostProcessing"
-sys.path.append(os.path.abspath(path))
 
-# Load Functions
 
+
+### Load Classes
+path_class = "/home/nicolas/Dropbox/Doctorado/PostProcessing/Class_definition"
+bashCommand = "rm -r " + path_class + "/__pycache__"
+os.system(bashCommand)
+sys.path.append(os.path.abspath(path_class))
 from class_definition import *
-from functions import *
+
+### Load Functions
+path_func = "/home/nicolas/Dropbox/Doctorado/PostProcessing/Functions"
+bashCommand = "rm -r " + path_func + "/__pycache__"
+os.system(bashCommand)
+sys.path.append(os.path.abspath(path_func))
+from load_data import *
+from plot_data import *
+from process_data import *
+
 
 # Main program
 
@@ -14,8 +26,13 @@ from functions import *
 def main():
     
     #path to data, must be in absolute form
-    path = '/home/nicolas/Dropbox/Doctorado/Simulaciones/3D/base_case/'
-    
+    #path = '/home/nicolas/Dropbox/Doctorado/Simulaciones/3D/thermal_actuator/third_armonic/'
+    path = '/home/nicolas/Dropbox/Doctorado/Simulaciones/DHC/3D/base_case/'
+
+    bashCommand = "rm " + path + "Images/*"
+
+    os.system(bashCommand)
+
     # Determinar la fila donde comienza la data
     #!head -n 411 high_ray.fld02 | tail -n 4
     
@@ -23,75 +40,93 @@ def main():
     mp_data = load_monitoring_points_data(path + 'hpts.out')
     #data_rms = load_data(path + 'rmshigh_ray.fld03',409)
     #data_avg = load_data(path + 'avghigh_ray.fld03',409)
-    '''
-    plane_1 = slice_plane(data_avg,0,1,0,0)
     
-    plot_3d("x","z","T",
-            plane_1,
-            "yes",10,"min","max",
-            30,path)
-    plot_3d("x","z","W",
-            plane_1,
-            "no",10,"min","max",
-            30,path)
-    
-    line_1 = slice_plane(slice_plane(data_avg,0,1,0,0),0,0,1,0)
-    line_2 = slice_plane(slice_plane(data_avg,0,1,0,0),1,0,0,0)    
+    plot3d = False
+    plotoverline = False
+    plotpointoverline = True
+    plotrmsprime = False
 
-    
-    plot_over_line("x","T",line_1,5,path)
-    plot_over_line("x","W",line_1,5,path)
-    plot_over_line("z","T",line_2,5,path)
-    '''
-    point_1 = monitoring_point(mp_data,1,5,30000)
-    smooth_point_1 = smooth_data(point_1,100)
+    #Image Format (png, eps, pdf, etc.)
+    image_format = "png"
 
-    plot_over_line("time","U",point_1,5,path)
-    plot_over_line("time","V",point_1,5,path)
-    plot_over_line("time","W",point_1,5,path)
-    plot_over_line("time","P",point_1,5,path)
-    plot_over_line("time","T",point_1,5,path)
+    if plot3d == True: 
 
-    dft_point_1 = dft_monitoring_point(smooth_point_1)
+        plane_1 = slice_plane(data_avg,0,1,0,0)
     
-    plot_dft(dft_point_1,"U",5,path)
-    plot_dft(dft_point_1,"V",5,path)
-    plot_dft(dft_point_1,"W",5,path)
-    plot_dft(dft_point_1,"P",5,path)
-    plot_dft(dft_point_1,"T",5,path)
-    
-    '''
-    data_prime = calc_res(data_rms,calc_power(data_avg,2))
-    
-    plane_1 = slice_plane(data_prime,0,1,0,0)
-    
-    plot_3d("x","z","U",
-            plane_1,
-            "yes",10,"min","max",
-            30,path)
-    plot_3d("x","z","V",
-            plane_1,
-            "no",10,"min","max",
-            30,path)
-    plot_3d("x","z","W",
-            plane_1,
-            "yes",10,"min","max",
-            30,path)
-    plot_3d("x","z","P",
-            plane_1,
-            "yes",10,"min","max",
-            30,path)
-    plot_3d("x","z","T",
-            plane_1,
-            "yes",10,"min","max",
-            30,path)
-    
-    return data,mp_data,data_rms,data_avg
-    '''
-    return mp_data
+        plot_3d("x","z","T",
+                plane_1,
+                "yes",10,"min","max",
+                30,path)
+        plot_3d("x","z","W",
+                plane_1,
+                "no",10,"min","max",
+                30,path)
 
+
+    if plotoverline == True:
+
+        line_1 = slice_plane(slice_plane(data_avg,0,1,0,0),0,0,1,0)
+        line_2 = slice_plane(slice_plane(data_avg,0,1,0,0),1,0,0,0)    
+
+        plot_over_line("x","T",line_1,5,path)
+        plot_over_line("x","W",line_1,5,path)
+        plot_over_line("z","T",line_2,5,path)
+
+
+    if plotpointoverline == True:
+        point_1 = monitoring_point(mp_data,1,5,20000)
+        smooth_point_1 = smooth_data(point_1,100)
+
+        plot_over_line("time","U",point_1,5,path)
+        plot_over_line("time","V",point_1,5,path)
+        plot_over_line("time","W",point_1,5,path)
+        plot_over_line("time","P",point_1,5,path)
+        
+        plot_over_line("time","T",point_1,5,path)
+    
+        dft_point_1 = dft_monitoring_point(smooth_point_1)
+        
+        plot_dft(dft_point_1,"U",5,path)
+        plot_dft(dft_point_1,"V",5,path)
+        plot_dft(dft_point_1,"W",5,path)
+        plot_dft(dft_point_1,"P",5,path)
+        
+        plot_dft(dft_point_1,"T",5,path)
+    
+
+    if plotrmsprime == True:
+
+        data_prime = calc_res(data_rms,calc_power(data_avg,2))
+    
+        plane_1 = slice_plane(data_prime,0,1,0,0)
+    
+        plot_3d("x","z","U",
+                plane_1,
+                "yes",10,"min","max",
+                30,path)
+        plot_3d("x","z","V",
+                plane_1,
+                "no",10,"min","max",
+                30,path)
+        plot_3d("x","z","W",
+                plane_1,
+                "yes",10,"min","max",
+                30,path)
+        plot_3d("x","z","P",
+                plane_1,
+                "yes",10,"min","max",
+                30,path)
+        plot_3d("x","z","T",
+                plane_1,
+                "yes",10,"min","max",
+                30,path)
+        
+    return 
 
 main()
+
+
+
 '''
 path = '/home/nicolas/Dropbox/Doctorado/Simulaciones/3D/thermal_actuator/fase/phi_0.66/'
 mp_data = load_monitoring_points_data(path + 'hpts.out')
