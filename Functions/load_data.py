@@ -8,7 +8,7 @@ from scipy.interpolate import interp1d
 from scipy.fftpack import fft, fftfreq
 import scipy.fftpack
 from matplotlib import rcParams
-
+import matplotlib.ticker
 
 
 from class_definition import *
@@ -17,7 +17,7 @@ from class_definition import *
 
 #####################################################################################################################
 #@njit
-def load_data(file_name,headers):
+def load_data(path,file_name,headers,data_format):
     """
     Load data from an external file in nek5000 format.
     
@@ -25,6 +25,7 @@ def load_data(file_name,headers):
     ----------
     file_name (str)             : name of the data file to load
     headers (int)               : row where data starts (skips headers).
+    data_format (str)           : FFormat of the file name, could be Nek5000 "ASCII" or "csv"
     
     Returns:
     --------
@@ -46,28 +47,72 @@ def load_data(file_name,headers):
 
     volume_aux = volume()
     
-    data = numpy.loadtxt(fname=file_name,skiprows=headers)
-    
-    volume_aux.mesh.x = data[:,0]
-    volume_aux.mesh.y = data[:,1]
-    volume_aux.mesh.z = data[:,2]
-    volume_aux.field.U = data[:,3]
-    volume_aux.field.V = data[:,4]
-    volume_aux.field.W = data[:,5]
-    volume_aux.field.P = data[:,6]
-    volume_aux.field.T = data[:,7]
+    volume_aux.history = file_name
+
+    if (data_format == "ASCII"):
+        data = numpy.loadtxt(fname=path + 'Data/' + file_name,skiprows=headers)
+        volume_aux.mesh.x = data[:,0]
+        volume_aux.mesh.y = data[:,1]
+        volume_aux.mesh.z = data[:,2]
+        volume_aux.field.U = data[:,3]
+        volume_aux.field.V = data[:,4]
+        volume_aux.field.W = data[:,5]
+        volume_aux.field.P = data[:,6]
+        volume_aux.field.T = data[:,7]
+    elif (data_format == "csv"):
+        data = numpy.loadtxt(fname=path + 'Data/' + file_name,skiprows=headers,delimiter=',')
+        volume_aux.mesh.x = data[:,9]
+        volume_aux.mesh.y = data[:,10]
+        volume_aux.mesh.z = data[:,11]
+        volume_aux.field.U = data[:,2]
+        volume_aux.field.V = data[:,3]
+        volume_aux.field.W = data[:,4]
+        volume_aux.field.P = data[:,0]
+        volume_aux.field.T = data[:,1]
+    elif (data_format == "2D_csv"):
+        data = numpy.loadtxt(fname=path + 'Data/' + file_name,skiprows=headers,delimiter=',')
+        volume_aux.mesh.x = data[:,8]
+        volume_aux.mesh.y = data[:,9]
+        volume_aux.mesh.z = data[:,10]
+        volume_aux.field.U = data[:,5]
+        volume_aux.field.V = data[:,6]
+        volume_aux.field.W = data[:,7]
+        volume_aux.field.P = data[:,0]
+        volume_aux.field.T = data[:,1]
+    elif (data_format == "oF_2D_csv"):
+        data = numpy.loadtxt(fname=path + 'Data/' + file_name,skiprows=headers,delimiter=',')
+        volume_aux.mesh.x = data[:,5]
+        volume_aux.mesh.y = data[:,6]
+        volume_aux.mesh.z = data[:,7]
+        volume_aux.field.U = data[:,1]
+        volume_aux.field.V = data[:,2]
+        volume_aux.field.W = data[:,3]
+        volume_aux.field.P = data[:,4]
+        volume_aux.field.T = data[:,0]
+    elif (data_format == "oF_csv"):
+        data = numpy.loadtxt(fname=path + 'Data/' + file_name,skiprows=headers,delimiter=',')
+        volume_aux.mesh.x = data[:,5]
+        volume_aux.mesh.y = data[:,6]
+        volume_aux.mesh.z = data[:,7]
+        volume_aux.field.U = data[:,1]
+        volume_aux.field.V = data[:,2]
+        volume_aux.field.W = data[:,3]
+        volume_aux.field.P = data[:,4]
+        volume_aux.field.T = data[:,0]
     
     return volume_aux
 
 #####################################################################################################################
 #@njit
-def load_monitoring_points_data(file_name):
+def load_monitoring_points_data(path,file_name):
     """
     load monitoring points data from an external file.
     
     Arguments:
     ----------
-    file_name (str)             : name of the data file to load
+    path (str)                  : File's absolute path
+    file_name (str)             : Name of the data file to load
+    ti (float)                  : Initial time to be load
     
     Returns:
     --------
@@ -89,8 +134,10 @@ def load_monitoring_points_data(file_name):
 
     mp_aux = volume()
     
-    data = numpy.loadtxt(fname=file_name,skiprows=1)
-    
+    data = numpy.loadtxt(fname=path + 'Data/' + file_name,skiprows=1)
+
+    mp_aux.history = file_name
+
     mp_aux.time = data[:,0]
     mp_aux.field.U = data[:,1]
     mp_aux.field.V = data[:,2]
