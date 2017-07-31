@@ -34,6 +34,7 @@ class gradient():
         
 class volume():
     def __init__(self):
+        self.history = str()
         self.time = []
         self.mesh = mesh()
         self.field = field()
