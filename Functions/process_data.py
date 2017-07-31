@@ -13,6 +13,7 @@ from matplotlib import rcParams
 
 from class_definition import *
 
+
 # Processing data
 
 
@@ -64,7 +65,18 @@ def slice_plane(data,a,b,c,d):
     """
     
     volume_aux = volume()
+   
+    volume_aux.history = data.history + '_slicePlane_pi:' +str(a)+'x'+str(b)+'y'+str(c)+'z'+str(d) 
+
+    # Interpolated Mesh
+    #int_size = 1000
+    #volume_aux.mesh.x = numpy.linspace(min(data.mesh.x),max(data.mesh.x),num=int_size)
+    #volume_aux.mesh.y = numpy.linspace(min(data.mesh.y),max(data.mesh.y),num=int_size)
+    #for i in range(0,int_size):
+	#    volume_aux.mesh.z[i] = (d - a*volume_aux.mesh.x[i] - b*volume_aux.mesh.y[i]) / c
+
     
+
     volume_aux.field.U = data.field.U[a*data.mesh.x[:]+b*data.mesh.y[:]+c*data.mesh.z[:] == d]
     volume_aux.field.V = data.field.V[a*data.mesh.x[:]+b*data.mesh.y[:]+c*data.mesh.z[:] == d]
     volume_aux.field.W = data.field.W[a*data.mesh.x[:]+b*data.mesh.y[:]+c*data.mesh.z[:] == d]
@@ -77,6 +89,75 @@ def slice_plane(data,a,b,c,d):
     volume_aux.mesh.z = data.mesh.z[a*data.mesh.x[:]+b*data.mesh.y[:]+c*data.mesh.z[:] == d]
 
     return volume_aux
+
+#####################################################################################################################
+#@njit
+def slice_line(data,point_1,point_2):
+    """
+    select data over the line which connects point_1 with point_2:
+        l:      (x1,y1,z1) + t * (x2,y2,z2).
+    ** Current version only supports points from the mesh located over the mesh, dosnt interpolate data.
+    
+    Arguments:
+    ----------
+    data (volume)               : data to be sliced over the line.
+                                      - data
+                                          |-> .time []           : current time for the data
+                                          |-> .mesh
+                                          |     |-> .x []        : x-coordinate of the volume's center
+                                          |     |-> .y []        : y-coordinate of the volume's center
+                                          |     '-> .z []        : z-coordinate of the volume's center
+                                          '-> .field
+                                                |-> .U []        : x-velocity
+                                                |-> .V []        : y-velocity
+                                                |-> .W []        : z-velocity
+                                                |-> .P []        : Pressure
+                                                '-> .T []        : Temperature
+
+
+    a (real)                    : x-component of the plane's normal vector.
+    b (real)                    : y-component of the plane's normal vector.
+    c (real)                    : z-component of the plane's normal vector.
+    d (real)                    : position parameter
+    
+    Returns:
+    --------
+    volume_aux (volume)         : filtered data:
+                                      - data
+                                          |-> .time []           : current time for the data
+                                          |-> .mesh
+                                          |     |-> .x []        : x-coordinate of the volume's center
+                                          |     |-> .y []        : y-coordinate of the volume's center
+                                          |     '-> .z []        : z-coordinate of the volume's center
+                                          '-> .field
+                                                |-> .U []        : x-velocity
+                                                |-> .V []        : y-velocity
+                                                |-> .W []        : z-velocity
+                                                |-> .P []        : Pressure
+                                                '-> .T []        : Temperature
+    """
+    
+    volume_aux = volume()
+   
+    volume_aux.history = data.history + '_sliceLine_l:' + point_1 + 'to' + point_2
+
+    ### work in progress
+
+    #volume_aux.field.U = data.field.U[a*data.mesh.x[:]+b*data.mesh.y[:]+c*data.mesh.z[:] == d]
+
+    #volume_aux.field.U = data.field.U[a*data.mesh.x[:]+b*data.mesh.y[:]+c*data.mesh.z[:] == d]
+    #volume_aux.field.V = data.field.V[a*data.mesh.x[:]+b*data.mesh.y[:]+c*data.mesh.z[:] == d]
+    #volume_aux.field.W = data.field.W[a*data.mesh.x[:]+b*data.mesh.y[:]+c*data.mesh.z[:] == d]
+    #volume_aux.field.P = data.field.P[a*data.mesh.x[:]+b*data.mesh.y[:]+c*data.mesh.z[:] == d]
+    #volume_aux.field.T = data.field.T[a*data.mesh.x[:]+b*data.mesh.y[:]+c*data.mesh.z[:] == d]
+
+    
+    #volume_aux.mesh.x = data.mesh.x[a*data.mesh.x[:]+b*data.mesh.y[:]+c*data.mesh.z[:] == d]
+    #volume_aux.mesh.y = data.mesh.y[a*data.mesh.x[:]+b*data.mesh.y[:]+c*data.mesh.z[:] == d]
+    #volume_aux.mesh.z = data.mesh.z[a*data.mesh.x[:]+b*data.mesh.y[:]+c*data.mesh.z[:] == d]
+
+    return volume_aux
+
 
 
 #####################################################################################################################
@@ -182,28 +263,20 @@ def monitoring_point(mp_data,mp_,nmp_,t0_):
     
     point_aux = volume()
     
-    point_aux.time = mp_data.time[mp_::nmp_][t0_:]
+    point_aux.history = mp_data.history + '_sensor_' + str(mp_) #+ 't0_' + str(t0_)
+
+    i = 0
+    while(mp_data.time[mp_::nmp_][i] < t0_ and i <= len(mp_data.time[mp_::nmp_])-2):
+        i = i+1
     
-    N = 1000
-    window = numpy.ones(N)/N
+    point_aux.time = mp_data.time[mp_::nmp_][i:]
     
-    point_aux.field.U = mp_data.field.U[mp_::nmp_][t0_:]
-    point_aux.field.V = mp_data.field.V[mp_::nmp_][t0_:]
-    point_aux.field.W = mp_data.field.W[mp_::nmp_][t0_:]
-    point_aux.field.P = mp_data.field.P[mp_::nmp_][t0_:]
-    point_aux.field.T = mp_data.field.T[mp_::nmp_][t0_:]
     
-    #point_aux.field.U = mp_data.field.U[mp_::nmp_][t0_:] - numpy.convolve(mp_data.field.U[mp_::nmp_][t0_:],window,'same')
-    #point_aux.field.V = mp_data.field.V[mp_::nmp_][t0_:] - numpy.convolve(mp_data.field.V[mp_::nmp_][t0_:],window,'same')
-    #point_aux.field.W = mp_data.field.W[mp_::nmp_][t0_:] - numpy.convolve(mp_data.field.W[mp_::nmp_][t0_:],window,'same')
-    #point_aux.field.P = mp_data.field.P[mp_::nmp_][t0_:] - numpy.convolve(mp_data.field.P[mp_::nmp_][t0_:],window,'same')
-    #point_aux.field.T = mp_data.field.T[mp_::nmp_][t0_:] - numpy.convolve(mp_data.field.T[mp_::nmp_][t0_:],window,'same')
-    
-    #point_aux.field.U = mp_data.field.U[mp_::nmp_][t0_:]- numpy.mean(mp_data.field.U[mp_::nmp_][t0_:])
-    #point_aux.field.V = mp_data.field.V[mp_::nmp_][t0_:]- numpy.mean(mp_data.field.V[mp_::nmp_][t0_:])
-    #point_aux.field.W = mp_data.field.W[mp_::nmp_][t0_:]- numpy.mean(mp_data.field.W[mp_::nmp_][t0_:])
-    #point_aux.field.P = mp_data.field.P[mp_::nmp_][t0_:]- numpy.mean(mp_data.field.P[mp_::nmp_][t0_:])
-    #point_aux.field.T = mp_data.field.T[mp_::nmp_][t0_:]- numpy.mean(mp_data.field.T[mp_::nmp_][t0_:]) 
+    point_aux.field.U = mp_data.field.U[mp_::nmp_][i:]
+    point_aux.field.V = mp_data.field.V[mp_::nmp_][i:]
+    point_aux.field.W = mp_data.field.W[mp_::nmp_][i:]
+    point_aux.field.P = mp_data.field.P[mp_::nmp_][i:]
+    point_aux.field.T = mp_data.field.T[mp_::nmp_][i:]
     
     point_out = point_aux
 
@@ -251,20 +324,29 @@ def smooth_data(data,N):
 
     """
     
-    window = numpy.ones(N)/N
+    #window = numpy.ones(N)/N
     
     smooth_data_out = volume()
     
-    smooth_data_out.time = data.time[N:][:-N]
+    smooth_data_out.history = data.history + "_smooth"
+
+    #smooth_data_out.time = data.time[N:][:-N]
+    smooth_data_out.time = data.time
     smooth_data_out.mesh.x = data.mesh.x
     smooth_data_out.mesh.y = data.mesh.y
     smooth_data_out.mesh.z = data.mesh.z
     
-    smooth_data_out.field.U = data.field.U[N:][:-N] - numpy.convolve(data.field.U,window,'same')[N:][:-N]
-    smooth_data_out.field.V = data.field.V[N:][:-N] - numpy.convolve(data.field.V,window,'same')[N:][:-N]
-    smooth_data_out.field.W = data.field.W[N:][:-N] - numpy.convolve(data.field.W,window,'same')[N:][:-N]
-    smooth_data_out.field.P = data.field.P[N:][:-N] - numpy.convolve(data.field.P,window,'same')[N:][:-N]
-    smooth_data_out.field.T = data.field.T[N:][:-N] - numpy.convolve(data.field.T,window,'same')[N:][:-N]
+    #smooth_data_out.field.U = data.field.U[N:][:-N] - numpy.convolve(data.field.U,window,'same')[N:][:-N]
+    #smooth_data_out.field.V = data.field.V[N:][:-N] - numpy.convolve(data.field.V,window,'same')[N:][:-N]
+    #smooth_data_out.field.W = data.field.W[N:][:-N] - numpy.convolve(data.field.W,window,'same')[N:][:-N]
+    #smooth_data_out.field.P = data.field.P[N:][:-N] - numpy.convolve(data.field.P,window,'same')[N:][:-N]
+    #smooth_data_out.field.T = data.field.T[N:][:-N] - numpy.convolve(data.field.T,window,'same')[N:][:-N]
+
+    smooth_data_out.field.U = data.field.U - numpy.average(data.field.U)
+    smooth_data_out.field.V = data.field.V - numpy.average(data.field.V)
+    smooth_data_out.field.W = data.field.W - numpy.average(data.field.W)
+    smooth_data_out.field.P = data.field.P - numpy.average(data.field.P)
+    smooth_data_out.field.T = data.field.T - numpy.average(data.field.T)
 
     return smooth_data_out
 
@@ -319,6 +401,8 @@ def dft_monitoring_point(point_):
     
     x = numpy.linspace(0, len(point_.time)/(max(point_.time)-min(point_.time)), len(scipy.fftpack.fft(U_interp.y)))
     
+    point_aux.history = point_.history + "_dft"
+
     point_aux.time = x
     point_aux.field.U = scipy.fftpack.fft(U_interp.y)
     point_aux.field.V = scipy.fftpack.fft(V_interp.y)
