@@ -17,7 +17,7 @@ from class_definition import *
 
 #####################################################################################################################
 #@njit
-def plot_3d(abs_,ord_,field_,data,contour_,number_of_level,field_min_,field_max_,scale_factor,out_path):
+def plot_3d(abs_,ord_,field_,data,contour_,number_of_level,field_min_,field_max_,scale_factor,out_path,plot_format = "png"):
     """
     Plot data in two dimensional heat map.
     
@@ -64,16 +64,19 @@ def plot_3d(abs_,ord_,field_,data,contour_,number_of_level,field_min_,field_max_
     y = getattr(getattr(data, "mesh"), ord_)
     field = getattr(getattr(data, "field"), field_)
     
-    #pyplot.figure(figsize=(max(x)*scale_factor,max(y)*scale_factor))
-    
+    print(x)
+    print(y)
+
     rcParams['font.family'] = 'serif'
-    rcParams['font.size'] = 14
-    
+    rcParams['font.size'] = 12
+    rcParams.update({'figure.autolayout': True})
+
     delta=1e-10
     
-    pyplot.figure(figsize=(max(x)*scale_factor,max(y)*scale_factor))
+    pyplot.figure(figsize=(max(x)*1.5*scale_factor,max(y)*scale_factor))
     x_ticks = numpy.arange(min(x), max(x)+delta, (max(x)-min(x))/5)
-    y_ticks = numpy.arange(min(y), max(y)+delta, (max(y)-min(y))/10)
+    #y_ticks = numpy.arange(min(y), max(y)+delta, (max(y)-min(y))/10)
+    y_ticks = numpy.linspace(min(y),max(y),num=5) 
     
     if field_min_ == "min" :
         min_ = min(field)
@@ -90,7 +93,7 @@ def plot_3d(abs_,ord_,field_,data,contour_,number_of_level,field_min_,field_max_
     #resolution = numpy.arange(min(field), max(field)+delta, (max(field)-min(field))/100)
     #iso_levels = numpy.arange(min(field), max(field)+delta, (max(field)-min(field))/number_of_level)
     
-    pyplot.title('Reduced Temperature at mid-large plane. \n')
+    #pyplot.title('Reduced Temperature at mid-large plane. \n')
     pyplot.xlim([min(x)-delta,max(x)+delta])
     pyplot.ylim([min(y)-delta,max(y)+delta])
     pyplot.xticks(x_ticks, rotation=75)
@@ -107,12 +110,13 @@ def plot_3d(abs_,ord_,field_,data,contour_,number_of_level,field_min_,field_max_
                           ls='-.',
                           lw=0.5,
                           colors='black');
-    pyplot.savefig(out_path+"Images/"+abs_+ord_+field_+'.eps')
+    pyplot.savefig(out_path+"Images/" + data.history + "_" +abs_ + ord_ + field_ + '.' + plot_format )
+    pyplot.close("all")
     return
 
 #####################################################################################################################
 #@njit
-def plot_over_line(abs_,field_,data,scale_factor,out_path):
+def plot_over_line(abs_,field_,data,scale_factor,out_path,plot_format = "png"):
     """
     Plot data previosuly sliced in a x-y dispersion graph.
     
@@ -140,7 +144,7 @@ def plot_over_line(abs_,field_,data,scale_factor,out_path):
     
 
     """
-    pyplot.figure(figsize=(2*scale_factor,1*scale_factor));
+    pyplot.figure(figsize=(2*scale_factor,1.2*scale_factor));
  
     if abs_ == "time" :
         x = getattr(data, abs_)
@@ -149,33 +153,56 @@ def plot_over_line(abs_,field_,data,scale_factor,out_path):
     y = getattr(getattr(data, "field"), field_) 
 
 
+    if field_ == "U":
+        pyplot.ylabel('X-Velocity [-]')
+    elif field_ == "V":
+        pyplot.ylabel('Y-Velocity [-]')
+    elif field_ == "W":
+        pyplot.ylabel('Z-Velocity [-]')
+    elif field_ == "P":
+        pyplot.ylabel('Pressure [-]')        
+    else:
+        pyplot.ylabel('Reduced Temperature [-]')
+
+    if abs_ == "x":
+        pyplot.xlabel('x')
+    elif abs_ == "y":
+        pyplot.xlabel('y')
+    elif abs_ == "z":
+        pyplot.xlabel('z')
+    elif abs_ == "time":
+        pyplot.xlabel('time')        
+
+
+
     rcParams['font.family'] = 'serif'
-    rcParams['font.size'] = 14
+    rcParams['font.size'] = 12
     
     delta=1e-12
-    
-    x_ticks = numpy.arange(min(x), max(x)+delta, (max(x)-min(x))/10)
-    y_ticks = numpy.arange(min(y), max(y)+delta, (max(y)-min(y))/10)
+
+    x_ticks = numpy.arange( min(x) , max(x)+delta , (max(x)-min(x))/10)
+    y_ticks = numpy.arange( min(y) , max(y)+delta , (max(y)-min(y))/10)
     
     x,y = zip(*sorted(zip(x,y)))
     
-    delta_y = (max(y) - min(y))
+    #delta_y = (max(y) - min(y))
     pyplot.xlim([min(x),max(x)])
-    pyplot.ylim([min(y)-delta_y*0.1,max(y)+delta_y*0.1])
-    pyplot.xticks(x_ticks, rotation=75)
+    pyplot.ylim([min(y),max(y)])
+    pyplot.xticks(x_ticks, rotation=0 )
     pyplot.yticks(y_ticks)
     pyplot.grid()
     pyplot.plot(x,y,
-                color='#2929e3',
+                color='black',
                 ls='-',
                 lw=1)
-    pyplot.savefig(out_path+"Images/"+abs_+field_+'.eps');
+    pyplot.savefig(out_path+"Images/" + data.history + "_"  + abs_ + field_ + '.' + plot_format);
+    pyplot.close("all") 
     return
 
 #####################################################################################################################
 #@njit
-def plot_dft(dft_point_,field_,scale_factor,out_path):
-    
+def plot_dft(dft_point_,field_,scale_factor,out_path,plot_format = "png"):
+
     pyplot.figure(figsize=(2*scale_factor,1.2*scale_factor));
     
     if field_ == "U":
@@ -199,7 +226,7 @@ def plot_dft(dft_point_,field_,scale_factor,out_path):
 
     
     rcParams['font.family'] = 'serif'
-    rcParams['font.size'] = 14
+    rcParams['font.size'] = 12
     
     delta=1e-15
     
@@ -216,8 +243,9 @@ def plot_dft(dft_point_,field_,scale_factor,out_path):
     pyplot.yticks(y_ticks)
     pyplot.grid()
     pyplot.semilogy(x, y,
-                color='#2929e3',
+                color='black',
                 ls='-',
                 lw=1)    
-    pyplot.savefig(out_path+'Images/dft_mp_'+field_+'.'+'png')
+    pyplot.savefig(out_path+'Images/'+ dft_point_.history + field_ +'.' + plot_format)
+    pyplot.close("all") 
     return
