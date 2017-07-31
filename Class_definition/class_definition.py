@@ -13,7 +13,18 @@ class field():
         self.W  = []
         self.P  = []
         self.T  = []
-        
+        self.uu = []
+        self.uv = []
+        self.uw = []
+        self.vv = []
+        self.vw = []
+        self.ww = []
+        self.PP = []
+        self.TT = []
+        self.uT = []
+        self.vT = []
+        self.wT = []
+       
 class gradient():
     def __init__(self):
         self.dUdx = []
@@ -31,7 +42,21 @@ class gradient():
         self.dTdx = []
         self.dTdy = []
         self.dTdz = []
-        
+
+#class rms():
+#    def __init__(self):
+#        self.uu = []
+#        self.uv = []
+#        self.uw = []
+#        self.vv = []
+#        self.vw = []
+#        self.ww = []
+#        self.PP = []
+#        self.TT = []
+#        self.uT = []
+#        self.vT = []
+#        self.wT = []
+
 class volume():
     def __init__(self):
         self.history = str()
@@ -39,3 +64,4 @@ class volume():
         self.mesh = mesh()
         self.field = field()
         self.gradient = gradient()
+#       self.rms = rms()
