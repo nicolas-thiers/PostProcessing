@@ -99,7 +99,22 @@ def load_data(path,file_name,headers,data_format):
         volume_aux.field.W = data[:,3]
         volume_aux.field.P = data[:,4]
         volume_aux.field.T = data[:,0]
-    
+    elif (data_format == "test_csv"):
+        data = numpy.loadtxt(fname=path + 'Data/' + file_name,skiprows=headers,delimiter=',')
+        volume_aux.mesh.x = data[:,10]
+        volume_aux.mesh.y = data[:,11]
+        volume_aux.mesh.z = data[:,12]
+        volume_aux.field.U = data[:,0]
+        volume_aux.field.V = data[:,1]
+        volume_aux.field.W = data[:,2]
+        volume_aux.field.P = data[:,3]
+        volume_aux.field.T = data[:,4]
+        volume_aux.field.uu = data[:,6]
+        volume_aux.field.vv = data[:,5]
+        volume_aux.field.ww = data[:,7]
+        volume_aux.field.PP = data[:,8]
+        volume_aux.field.TT = data[:,9]
+
     return volume_aux
 
 #####################################################################################################################
