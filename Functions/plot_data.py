@@ -101,7 +101,7 @@ def plot_3d(abs_,ord_,field_,data,contour_,number_of_level,field_min_,field_max_
     pyplot.grid()
     pyplot.tricontourf(x,y,field,
                        levels = resolution,
-                       cmap='seismic')    
+                       cmap='rainbow')    
     pyplot.colorbar()
     
     if contour_ == "yes" :
