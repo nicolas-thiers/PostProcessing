@@ -8,7 +8,11 @@ from scipy.interpolate import interp1d
 from scipy.fftpack import fft, fftfreq
 import scipy.fftpack
 from matplotlib import rcParams
+from matplotlib.colors import LogNorm
 
+import colormaps as cmaps
+pyplot.register_cmap(name='viridis', cmap=cmaps.viridis)
+pyplot.set_cmap(cmaps.viridis)
 
 
 from class_definition import *
@@ -17,7 +21,7 @@ from class_definition import *
 
 #####################################################################################################################
 #@njit
-def plot_3d(abs_,ord_,field_,data,contour_,number_of_level,field_min_,field_max_,scale_factor,out_path,plot_format = "png"):
+def plot_3d(abs_,ord_,field_,data,contour_,number_of_level,field_min_,field_max_,scale_factor,out_path,plot_format = "png",normalized=True):
     """
     Plot data in two dimensional heat map.
     
@@ -63,7 +67,11 @@ def plot_3d(abs_,ord_,field_,data,contour_,number_of_level,field_min_,field_max_
     x = getattr(getattr(data, "mesh"), abs_)
     y = getattr(getattr(data, "mesh"), ord_)
     field = getattr(getattr(data, "field"), field_)
-    
+ 
+    if (normalized == True):
+        x = (x-min(x))/(max(x)-min(x))
+        y = (y-min(y))/(max(y)-min(y))
+   
     print(x)
     print(y)
 
@@ -72,22 +80,21 @@ def plot_3d(abs_,ord_,field_,data,contour_,number_of_level,field_min_,field_max_
     rcParams.update({'figure.autolayout': True})
 
     delta=1e-10
-    
-    pyplot.figure(figsize=(max(x)*1.5*scale_factor,max(y)*scale_factor))
-    x_ticks = numpy.arange(min(x), max(x)+delta, (max(x)-min(x))/5)
-    #y_ticks = numpy.arange(min(y), max(y)+delta, (max(y)-min(y))/10)
-    y_ticks = numpy.linspace(min(y),max(y),num=5) 
-    
+
     if field_min_ == "min" :
-        min_ = min(field)
+        min_ = min(field) - delta
     else :
-        min_ = field_min
+        min_ = field_min_ - delta
     if field_max_ == "max" :
         max_ = max(field) + delta
     else :
         max_ = field_max_ + delta
-        
-    resolution = numpy.arange(min_, max_, (max_ - min_)/501)
+
+    pyplot.figure(figsize=(max(x)*1.5*scale_factor,max(y)*scale_factor))
+    x_ticks = numpy.linspace(min(x),max(x),num=5) 
+    y_ticks = numpy.linspace(min(y),max(y),num=5) 
+
+    resolution = numpy.arange(min_-delta, max_+delta, (max_ - min_)/10)
     iso_levels = numpy.arange(min_, max_, (max_ - min_)/number_of_level)
     
     #resolution = numpy.arange(min(field), max(field)+delta, (max(field)-min(field))/100)
@@ -101,7 +108,7 @@ def plot_3d(abs_,ord_,field_,data,contour_,number_of_level,field_min_,field_max_
     pyplot.grid()
     pyplot.tricontourf(x,y,field,
                        levels = resolution,
-                       cmap='rainbow')    
+                       cmap='viridis')    
     pyplot.colorbar()
     
     if contour_ == "yes" :
@@ -110,7 +117,74 @@ def plot_3d(abs_,ord_,field_,data,contour_,number_of_level,field_min_,field_max_
                           ls='-.',
                           lw=0.5,
                           colors='black');
-    pyplot.savefig(out_path+"Images/" + data.history + "_" +abs_ + ord_ + field_ + '.' + plot_format )
+    pyplot.savefig(out_path+"Images/" + data.history[20:] + "_" + field_ + '.' + plot_format )
+    pyplot.close("all")
+    return
+
+#####################################################################################################################
+#@njit
+def plot_PDF(abs_,ord_,field_,data,x_range,y_range,scale_factor,out_path,plot_format = "png"):
+    """
+    Plot data in two dimensional heat map.
+    
+    Arguments:
+    ----------
+    abs_ (str)                  : Space dimension to be plotted over x-axis.
+    ord_ (str)                  : Space dimension to be plotted over y-axis.
+    field_ (str)                : Field to be plotted in the heat map.
+    data (volume)               : Data to be plotted:
+                                      - data
+                                          |-> .time []           : Current time 
+                                          |-> .mesh
+                                          |     |-> .x []        : x-coordinate of the volume's center.
+                                          |     |-> .y []        : y-coordinate of the volume's center.
+                                          |     '-> .z []        : z-coordinate of the volume's center.
+                                          '-> .field
+                                                |-> .U []        : x-velocity.
+                                                |-> .V []        : y-velocity.
+                                                |-> .W []        : z-velocity.
+                                                |-> .P []        : Pressure.
+                                                '-> .T []        : Temperature.
+    contour_ (str)              : Add contour lines to he plot.
+                                      - possible values:
+                                          |-> "yes"              : iso-lines enable.
+                                          '-> "no"               : iso-lines disable.
+    number_of_level (int)       : Number of iso-lines when contour lines are enable.
+    field_min_ ("str" or float) : minimal value in the field data to be plotted when float type is used.
+                                      - possible string values:
+                                          '-> "min"              : auto-adjust to the minimum value in the field 
+                                                                   data.
+    field_max_ ("str" or float) : maximal value in the field data to be plotted when float type is used.
+                                      - possible string values:
+                                          '-> "max"              : auto-adjust to the maximum value in the field 
+    scale_factor (int)          : scale factor of the output plot.                                    
+    out_path (str)              : output path where store graph.
+    
+    Returns:
+    --------
+    
+
+    """
+    pyplot.figure(figsize=(scale_factor,scale_factor))
+    rcParams['font.family'] = 'serif'
+    rcParams['font.size'] = 12
+    rcParams.update({'figure.autolayout': True})
+
+    x = getattr(getattr(data, "field"), abs_) 
+    y = getattr(getattr(data, "field"), ord_)
+    xedges = numpy.linspace(x_range[0],x_range[1],1000)
+    yedges = numpy.linspace(y_range[0],y_range[1],1000)
+    
+    print(xedges)
+    print(yedges)
+
+    H, xedges, yedges = numpy.histogram2d(x, y, bins=(xedges,yedges))
+    H = H.T
+    X,Y = numpy.meshgrid(xedges,yedges)
+    pyplot.contourf(X[1:,1:],Y[1:,1:],H,cmap = "viridis",norm = LogNorm())
+    pyplot.colorbar()
+    pyplot.contour(X[1:,1:],Y[1:,1:],H,colors = "black",norm = LogNorm())
+    pyplot.savefig(out_path+"Images/" + data.history[20:] + "_" + field_ + '.' + plot_format )
     pyplot.close("all")
     return
 

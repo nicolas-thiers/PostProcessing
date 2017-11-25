@@ -24,6 +24,15 @@ class field():
         self.uT = []
         self.vT = []
         self.wT = []
+        self.k  = []
+        self.I2 = []
+        self.I3 = []
+        self.QA = []
+        self.RA = []
+        self.QS = []
+        self.RS = []
+        self.QW = []
+        self.RW = []
        
 class gradient():
     def __init__(self):
@@ -43,20 +52,6 @@ class gradient():
         self.dTdy = []
         self.dTdz = []
 
-#class rms():
-#    def __init__(self):
-#        self.uu = []
-#        self.uv = []
-#        self.uw = []
-#        self.vv = []
-#        self.vw = []
-#        self.ww = []
-#        self.PP = []
-#        self.TT = []
-#        self.uT = []
-#        self.vT = []
-#        self.wT = []
-
 class volume():
     def __init__(self):
         self.history = str()
@@ -64,4 +59,3 @@ class volume():
         self.mesh = mesh()
         self.field = field()
         self.gradient = gradient()
-#       self.rms = rms()

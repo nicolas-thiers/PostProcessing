@@ -116,7 +116,7 @@ def load_data(path,file_name,headers,data_format):
         volume_aux.field.T = data[:,0]
     elif (data_format == "test_csv"):
         print("     Reading file ...")
-        data = numpy.loadtxt(fname=path + 'Data/' + file_name,skiprows=headers,delimiter=',')
+        data = numpy.loadtxt(fname=path + file_name,skiprows=headers,delimiter=',')
         print("     Done reading file.")
         print("     Storing data in 'volume_cell' format ...")
         volume_aux.mesh.x = data[:,10]
@@ -148,7 +148,65 @@ def load_data(path,file_name,headers,data_format):
         volume_aux.field.vv = data[:,4]
         volume_aux.field.PP = data[:,6]
         volume_aux.field.TT = data[:,7]
-
+    elif (data_format == "line_csv"):
+        print("     Reading file ...")
+        data = numpy.loadtxt(fname=path + 'Data/' + file_name,skiprows=headers,delimiter=',')
+        print("     Done reading file.")
+        print("     Storing data in 'volume_cell' format ...")
+        volume_aux.mesh.x = data[:,12]
+        volume_aux.mesh.y = data[:,13]
+        volume_aux.mesh.z = data[:,14]
+        volume_aux.field.U = data[:,0]
+        volume_aux.field.V = data[:,1]
+        volume_aux.field.W = data[:,2]
+        volume_aux.field.P = data[:,3]
+        volume_aux.field.T = data[:,4]
+        volume_aux.field.uu = data[:,6]
+        volume_aux.field.vv = data[:,5]
+        volume_aux.field.ww = data[:,7]
+        volume_aux.field.PP = data[:,8]
+        volume_aux.field.TT = data[:,9]
+    elif (data_format == "turb_stats_csv"):
+        print("     Reading file ...")
+        data = numpy.loadtxt(fname=path + file_name,skiprows=headers,delimiter=',')
+        print("     Done reading file.")
+        print("     Storing data in 'volume_cell' format ...")
+        volume_aux.mesh.x = data[:,18]
+        volume_aux.mesh.y = data[:,19]
+        volume_aux.mesh.z = data[:,20]
+        volume_aux.field.U = data[:,0]
+        volume_aux.field.V = data[:,1]
+        volume_aux.field.W = data[:,2]
+        #volume_aux.field.P = data[:,3]
+        volume_aux.field.T = data[:,3]
+        volume_aux.field.uu = data[:,4]
+        volume_aux.field.uv = data[:,5]
+        volume_aux.field.uw = data[:,6]
+        volume_aux.field.vv = data[:,7]
+        volume_aux.field.vw = data[:,8]
+        volume_aux.field.ww = data[:,9]
+        #volume_aux.field.PP = data[:, ]
+        volume_aux.field.TT = data[:,10]
+        volume_aux.field.uT = data[:,11]
+        volume_aux.field.vT = data[:,12]
+        volume_aux.field.wT = data[:,13]
+        volume_aux.field.k = data[:,14]
+        volume_aux.field.I2 = data[:,16]
+        volume_aux.field.I3 = data[:,17]
+    elif (data_format == "gradU_csv"):
+        print("     Reading file ...")
+        data = numpy.loadtxt(fname=path + file_name,skiprows=headers,delimiter=',')
+        print("     Done reading file.")
+        print("     Storing data in 'volume_cell' format ...")
+        volume_aux.mesh.x = data[:,2]
+        volume_aux.mesh.y = data[:,3]
+        volume_aux.mesh.z = data[:,4]
+        volume_aux.field.QA = data[:,0]
+        volume_aux.field.RA = data[:,1]
+        #volume_aux.field.QS = data[:,2]
+        #volume_aux.field.RS = data[:,3]
+        #volume_aux.field.QW = data[:,4]
+        #volume_aux.field.RW = data[:,5]
     print("Done loading Data file")
 
     return volume_aux
