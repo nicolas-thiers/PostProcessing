@@ -13,7 +13,8 @@ from matplotlib.colors import LogNorm
 import colormaps as cmaps
 pyplot.register_cmap(name='viridis', cmap=cmaps.viridis)
 pyplot.set_cmap(cmaps.viridis)
-
+pyplot.register_cmap(name='magma', cmap=cmaps.magma)
+pyplot.set_cmap(cmaps.magma)
 
 from class_definition import *
 
@@ -21,7 +22,7 @@ from class_definition import *
 
 #####################################################################################################################
 #@njit
-def plot_3d(abs_,ord_,field_,data,contour_,number_of_level,field_min_,field_max_,scale_factor,out_path,plot_format = "png",normalized=True):
+def plot_3d(abs_,ord_,field_,data,contour_,number_of_level,field_min_,field_max_,scale_factor,out_path,plot_format = "png",normalized=True,cmaps='viridis'):
     """
     Plot data in two dimensional heat map.
     
@@ -72,12 +73,9 @@ def plot_3d(abs_,ord_,field_,data,contour_,number_of_level,field_min_,field_max_
         x = (x-min(x))/(max(x)-min(x))
         y = (y-min(y))/(max(y)-min(y))
    
-    print(x)
-    print(y)
-
     rcParams['font.family'] = 'serif'
     rcParams['font.size'] = 12
-    rcParams.update({'figure.autolayout': True})
+    #rcParams.update({'figure.autolayout': True})
 
     delta=1e-10
 
@@ -108,7 +106,7 @@ def plot_3d(abs_,ord_,field_,data,contour_,number_of_level,field_min_,field_max_
     pyplot.grid()
     pyplot.tricontourf(x,y,field,
                        levels = resolution,
-                       cmap='viridis')    
+                       cmap=cmaps)    
     pyplot.colorbar()
     
     if contour_ == "yes" :
