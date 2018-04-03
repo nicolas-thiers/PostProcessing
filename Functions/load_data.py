@@ -1,17 +1,16 @@
 # Load Packages
 
 import numpy
-#from numba import njit
-from matplotlib import pyplot
-#get_ipython().magic('matplotlib inline')
-from scipy.interpolate import interp1d
-from scipy.fftpack import fft, fftfreq
-import scipy.fftpack
-from matplotlib import rcParams
-import matplotlib.ticker
-
+import csv 
+#from matplotlib import pyplot
+#from scipy.interpolate import interp1d
+#from scipy.fftpack import fft, fftfreq
+#import scipy.fftpack
+#from matplotlib import rcParams
+#import matplotlib.ticker
 
 from class_definition import *
+from create_class import *
 
 #Load Data
 
@@ -49,175 +48,19 @@ def load_data(path,file_name,headers,data_format):
     
     volume_aux.history = file_name
 
-    if (data_format == "ASCII"):
-        print("     Reading file ...")
-        data = numpy.loadtxt(fname=path + 'Data/' + file_name,skiprows=headers)
-        print("     Done reading file.")
-        print("     Storing data in 'volume_cell' format ...")
-        volume_aux.mesh.x = data[:,0]
-        volume_aux.mesh.y = data[:,1]
-        volume_aux.mesh.z = data[:,2]
-        volume_aux.field.U = data[:,3]
-        volume_aux.field.V = data[:,4]
-        volume_aux.field.W = data[:,5]
-        volume_aux.field.P = data[:,6]
-        volume_aux.field.T = data[:,7]
-    elif (data_format == "csv"):
-        print("     Reading file ...")
-        data = numpy.loadtxt(fname=path + 'Data/' + file_name,skiprows=headers,delimiter=',')
-        print("     Done reading file.")
-        print("     Storing data in 'volume_cell' format ...")
-        volume_aux.mesh.x = data[:,9]
-        volume_aux.mesh.y = data[:,10]
-        volume_aux.mesh.z = data[:,11]
-        volume_aux.field.U = data[:,2]
-        volume_aux.field.V = data[:,3]
-        volume_aux.field.W = data[:,4]
-        volume_aux.field.P = data[:,0]
-        volume_aux.field.T = data[:,1]
-    elif (data_format == "2D_csv"):
-        print("     Reading file ...")
-        data = numpy.loadtxt(fname=path + 'Data/' + file_name,skiprows=headers,delimiter=',')
-        print("     Done reading file.")
-        print("     Storing data in 'volume_cell' format ...")
-        volume_aux.mesh.x = data[:,8]
-        volume_aux.mesh.y = data[:,9]
-        volume_aux.mesh.z = data[:,10]
-        volume_aux.field.U = data[:,5]
-        volume_aux.field.V = data[:,6]
-        volume_aux.field.W = data[:,7]
-        volume_aux.field.P = data[:,0]
-        volume_aux.field.T = data[:,1]
-    elif (data_format == "oF_2D_csv"):
-        print("     Reading file ...")
-        data = numpy.loadtxt(fname=path + 'Data/' + file_name,skiprows=headers,delimiter=',')
-        print("     Done reading file.")
-        print("     Storing data in 'volume_cell' format ...")
-        volume_aux.mesh.x = data[:,5]
-        volume_aux.mesh.y = data[:,6]
-        volume_aux.mesh.z = data[:,7]
-        volume_aux.field.U = data[:,1]
-        volume_aux.field.V = data[:,2]
-        volume_aux.field.W = data[:,3]
-        volume_aux.field.P = data[:,4]
-        volume_aux.field.T = data[:,0]
-    elif (data_format == "oF_csv"):
-        print("     Reading file ...")
-        data = numpy.loadtxt(fname=path + 'Data/' + file_name,skiprows=headers,delimiter=',')
-        print("     Done reading file.")
-        print("     Storing data in 'volume_cell' format ...")
-        volume_aux.mesh.x = data[:,5]
-        volume_aux.mesh.y = data[:,6]
-        volume_aux.mesh.z = data[:,7]
-        volume_aux.field.U = data[:,1]
-        volume_aux.field.V = data[:,2]
-        volume_aux.field.W = data[:,3]
-        volume_aux.field.P = data[:,4]
-        volume_aux.field.T = data[:,0]
-    elif (data_format == "test_csv"):
-        print("     Reading file ...")
-        data = numpy.loadtxt(fname=path + file_name,skiprows=headers,delimiter=',')
-        print("     Done reading file.")
-        print("     Storing data in 'volume_cell' format ...")
-        volume_aux.mesh.x = data[:,10]
-        volume_aux.mesh.y = data[:,11]
-        volume_aux.mesh.z = data[:,12]
-        volume_aux.field.U = data[:,0]
-        volume_aux.field.V = data[:,1]
-        volume_aux.field.W = data[:,2]
-        volume_aux.field.P = data[:,3]
-        volume_aux.field.T = data[:,4]
-        volume_aux.field.uu = data[:,6]
-        volume_aux.field.vv = data[:,5]
-        volume_aux.field.ww = data[:,7]
-        volume_aux.field.PP = data[:,8]
-        volume_aux.field.TT = data[:,9]
-    elif (data_format == "test_2D_csv"):
-        print("     Reading file ...")
-        data = numpy.loadtxt(fname=path + 'Data/' + file_name,skiprows=headers,delimiter=',')
-        print("     Done reading file.")
-        print("     Storing data in 'volume_cell' format ...")
-        volume_aux.mesh.x = data[:,8]
-        volume_aux.mesh.y = data[:,9]
-        volume_aux.mesh.z = data[:,10]
-        volume_aux.field.U = data[:,0]
-        volume_aux.field.V = data[:,1]
-        volume_aux.field.P = data[:,2]
-        volume_aux.field.T = data[:,3]
-        volume_aux.field.uu = data[:,5]
-        volume_aux.field.vv = data[:,4]
-        volume_aux.field.PP = data[:,6]
-        volume_aux.field.TT = data[:,7]
-    elif (data_format == "line_csv"):
-        print("     Reading file ...")
-        data = numpy.loadtxt(fname=path + 'Data/' + file_name,skiprows=headers,delimiter=',')
-        print("     Done reading file.")
-        print("     Storing data in 'volume_cell' format ...")
-        volume_aux.mesh.x = data[:,12]
-        volume_aux.mesh.y = data[:,13]
-        volume_aux.mesh.z = data[:,14]
-        volume_aux.field.U = data[:,0]
-        volume_aux.field.V = data[:,1]
-        volume_aux.field.W = data[:,2]
-        volume_aux.field.P = data[:,3]
-        volume_aux.field.T = data[:,4]
-        volume_aux.field.uu = data[:,6]
-        volume_aux.field.vv = data[:,5]
-        volume_aux.field.ww = data[:,7]
-        volume_aux.field.PP = data[:,8]
-        volume_aux.field.TT = data[:,9]
-    elif (data_format == "turb_stats_csv"):
-        print("     Reading file ...")
-        data = numpy.loadtxt(fname=path + file_name,skiprows=headers,delimiter=',')
-        print("     Done reading file.")
-        print("     Storing data in 'volume_cell' format ...")
-        volume_aux.mesh.x = data[:,17]
-        volume_aux.mesh.y = data[:,18]
-        volume_aux.mesh.z = data[:,19]
-        volume_aux.field.U = data[:,0]
-        volume_aux.field.V = data[:,1]
-        volume_aux.field.W = data[:,2]
-        #volume_aux.field.P = data[:,3]
-        volume_aux.field.T = data[:,3]
-        volume_aux.field.uu = data[:,5]
-        volume_aux.field.uuu = data[:,8]
-        volume_aux.field.vvv = data[:,9]
-        volume_aux.field.www = data[:,10]
-        volume_aux.field.TTT = data[:,11]
+    fieldsDict = {}
+    csvFile = csv.DictReader(open( path + file_name ), delimiter=',')   
+    for i in csvFile.fieldnames[:-3]:
+        fieldsDict[i] = []
 
-        volume_aux.field.uuuu = data[:,12]
-        volume_aux.field.vvvv = data[:,13]
-        volume_aux.field.wwww = data[:,14]
-        volume_aux.field.TTTT = data[:,15]
+    data = numpy.loadtxt(fname=path + file_name,skiprows=headers,delimiter=',')
 
-#       volume_aux.field.uv = data[:,x]
-#       volume_aux.field.uw = data[:,x]
-        volume_aux.field.vv = data[:,4]
-#       volume_aux.field.vw = data[:,x]
-        volume_aux.field.ww = data[:,6]
-        #volume_aux.field.PP = data[:, ]
-        volume_aux.field.TT = data[:,7]
-#       volume_aux.field.uT = data[:,xx]
-#       volume_aux.field.vT = data[:,xx]
-#       volume_aux.field.wT = data[:,xx]
-        volume_aux.field.k = data[:,16]
-#       volume_aux.field.I2 = data[:,xx]
-#       volume_aux.field.I3 = data[:,xx]
-    elif (data_format == "gradU_csv"):
-        print("     Reading file ...")
-        data = numpy.loadtxt(fname=path + file_name,skiprows=headers,delimiter=',')
-        print("     Done reading file.")
-        print("     Storing data in 'volume_cell' format ...")
-        volume_aux.mesh.x = data[:,2]
-        volume_aux.mesh.y = data[:,3]
-        volume_aux.mesh.z = data[:,4]
-        volume_aux.field.QA = data[:,0]
-        volume_aux.field.RA = data[:,1]
-        #volume_aux.field.QS = data[:,2]
-        #volume_aux.field.RS = data[:,3]
-        #volume_aux.field.QW = data[:,4]
-        #volume_aux.field.RW = data[:,5]
-    print("Done loading Data file")
+	create_classes(volume_=volume_aux , classDict_ = fieldsDict)	
+
+	for i in range(0,len(csvFile.fieldnames[:-3])):
+	    setattr(field,list(fieldsDict)[i],data[:,i])
+
+	print("Done loading Data file")
 
     return volume_aux
 
