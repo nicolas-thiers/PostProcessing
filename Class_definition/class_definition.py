@@ -8,7 +8,8 @@ class mesh():
 
 class field():
     def __init__(self):
-        self.U = []
+        '''
+		self.U = []
         self.V = []
         self.W  = []
         self.P  = []
@@ -33,10 +34,11 @@ class field():
         self.RS = []
         self.QW = []
         self.RW = []
-       
+        '''
 class gradient():
     def __init__(self):
-        self.dUdx = []
+        '''
+		self.dUdx = []
         self.dUdy = []
         self.dUdz = []
         self.dVdx = []
@@ -51,7 +53,7 @@ class gradient():
         self.dTdx = []
         self.dTdy = []
         self.dTdz = []
-
+        '''
 class volume():
     def __init__(self):
         self.history = str()
