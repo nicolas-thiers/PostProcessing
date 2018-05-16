@@ -2,6 +2,7 @@
 
 import numpy
 import csv 
+import pandas
 #from matplotlib import pyplot
 #from scipy.interpolate import interp1d
 #from scipy.fftpack import fft, fftfreq
@@ -16,7 +17,7 @@ from create_class import *
 
 #####################################################################################################################
 #@njit
-def load_data(path,file_name,headers,data_format):
+def load_data(path,file_name,headers):
     """
     Load data from an external file in nek5000 format.
     
@@ -50,17 +51,22 @@ def load_data(path,file_name,headers,data_format):
 
     fieldsDict = {}
     csvFile = csv.DictReader(open( path + file_name ), delimiter=',')   
-    for i in csvFile.fieldnames[:-3]:
+    print(csvFile.fieldnames)
+    for i in csvFile.fieldnames[:]:
         fieldsDict[i] = []
 
-    data = numpy.loadtxt(fname=path + file_name,skiprows=headers,delimiter=',')
+    data_aux = pandas.read_csv( path + file_name , header = 0)
+    data = numpy.array(data_aux)
+    #data = numpy.loadtxt(fname=path + file_name,skiprows=headers,delimiter=',')
 
-	create_classes(volume_=volume_aux , classDict_ = fieldsDict)	
+    create_classes(volume_=volume_aux , classDict_ = fieldsDict)	
 
-	for i in range(0,len(csvFile.fieldnames[:-3])):
-	    setattr(field,list(fieldsDict)[i],data[:,i])
+    for i in range(0,len(csvFile.fieldnames[:])):
+        setattr(volume_aux.field,csvFile.fieldnames[i],data[:,i])    #data[:,i] no coincide con el atributo fieldsDict[i], T almacenada en field.u por ejemplo
 
-	print("Done loading Data file")
+    setattr(volume_aux.mesh,"x",getattr(volume_aux.field,"Points:0"))
+    setattr(volume_aux.mesh,"y",getattr(volume_aux.field,"Points:1"))
+    setattr(volume_aux.mesh,"z",getattr(volume_aux.field,"Points:2"))
 
     return volume_aux
 
@@ -95,15 +101,20 @@ def load_monitoring_points_data(path,file_name):
     """
 
     mp_aux = volume()
+
+    fieldsDict = {'u':[] , 'v':[] , 'w':[] , 'P':[] , 'T':[] }
+    create_classes(volume_=mp_aux , classDict_ = fieldsDict)	
     
-    data = numpy.loadtxt(fname=path + 'Data/' + file_name,skiprows=1)
+    print(path + file_name)
+    data = numpy.loadtxt(fname=path + file_name,skiprows=1)
+    print(len(data))
 
     mp_aux.history = file_name
 
-    mp_aux.time = data[:,0]
-    mp_aux.field.U = data[:,1]
-    mp_aux.field.V = data[:,2]
-    mp_aux.field.W = data[:,3]
+    mp_aux.time    = data[:,0]
+    mp_aux.field.u = data[:,1]
+    mp_aux.field.v = data[:,2]
+    mp_aux.field.w = data[:,3]
     mp_aux.field.P = data[:,4]
     mp_aux.field.T = data[:,5]
     
