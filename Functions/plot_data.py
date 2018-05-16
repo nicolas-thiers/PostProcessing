@@ -115,7 +115,7 @@ def plot_3d(abs_,ord_,field_,data,contour_,number_of_level,field_min_,field_max_
                           ls='-.',
                           lw=0.5,
                           colors='black');
-    pyplot.savefig(out_path+"Images/" + data.history[20:] + "_" + field_ + '.' + plot_format )
+    pyplot.savefig(out_path+"Images/Slices/" + data.history[20:-4] + "_" + field_ + '.' + plot_format )
     pyplot.close("all")
     return
 
@@ -238,7 +238,7 @@ def plot_streamlines(abs_,ord_,vectorX_,vectorY_,field_,data_,outPath_,plotForma
                        levels = resolution,
                        cmap=cmaps)    
     '''
-    pyplot.savefig(outPath_+"Images/streamLine" + data_.history[20:] + "_" + field_+'.'+plotFormat_,format=plotFormat_,bbox_inches='tight',rasterized=True,dpi=300)
+    pyplot.savefig(outPath_+"Images/streamLines/" + data_.history[20:-4] + "_" + field_+'.'+plotFormat_,format=plotFormat_,bbox_inches='tight',rasterized=True,dpi=300)
     pyplot.close("all")
     return
 
@@ -312,7 +312,7 @@ def plot_PDF(abs_,ord_,field_,data,x_range,y_range,scale_factor,out_path,plot_fo
 
 #####################################################################################################################
 #@njit
-def plot_over_line(abs_,field_,data,scale_factor,out_path,plot_format = "png"):
+def plot_over_line(abs_,field_,data,scale_factor,out_path,plot_format = "png",labels = {'x_label':'','y_label':'','title':''}):
     """
     Plot data previosuly sliced in a x-y dispersion graph.
     
@@ -342,13 +342,15 @@ def plot_over_line(abs_,field_,data,scale_factor,out_path,plot_format = "png"):
     """
     pyplot.figure(figsize=(2*scale_factor,1.2*scale_factor));
  
-    if abs_ == "time" :
+    if abs_ == "arc_length":
+        x = getattr(getattr(data, "field"), abs_)
+    elif abs_ == "time" :
         x = getattr(data, abs_)
     else :
         x = getattr(getattr(data, "mesh"), abs_)
     y = getattr(getattr(data, "field"), field_) 
 
-
+    '''
     if field_ == "U":
         pyplot.ylabel('X-Velocity [-]')
     elif field_ == "V":
@@ -360,7 +362,9 @@ def plot_over_line(abs_,field_,data,scale_factor,out_path,plot_format = "png"):
     else:
         pyplot.ylabel('Reduced Temperature [-]')
 
-    if abs_ == "x":
+    if abs_ == "arc_length":
+        pyplot.xlabel('')
+    elif abs_ == "x":
         pyplot.xlabel('x')
     elif abs_ == "y":
         pyplot.xlabel('y')
@@ -368,16 +372,18 @@ def plot_over_line(abs_,field_,data,scale_factor,out_path,plot_format = "png"):
         pyplot.xlabel('z')
     elif abs_ == "time":
         pyplot.xlabel('time')        
-
-
+    '''
+    pyplot.xlabel(labels['x_label'])
+    pyplot.ylabel(labels['y_label'])
+    pyplot.title(labels['title'])
 
     rcParams['font.family'] = 'serif'
     rcParams['font.size'] = 12
     
     delta=1e-12
 
-    x_ticks = numpy.arange( min(x) , max(x)+delta , (max(x)-min(x))/10)
-    y_ticks = numpy.arange( min(y) , max(y)+delta , (max(y)-min(y))/10)
+    x_ticks = numpy.arange( min(x) , max(x)+delta , (max(x)-min(x)+delta)/10)
+    y_ticks = numpy.arange( min(y) , max(y)+delta , (max(y)-min(y)+delta)/10)
     
     x,y = zip(*sorted(zip(x,y)))
     
@@ -391,7 +397,10 @@ def plot_over_line(abs_,field_,data,scale_factor,out_path,plot_format = "png"):
                 color='black',
                 ls='-',
                 lw=1)
-    pyplot.savefig(out_path+"Images/" + data.history + "_"  + abs_ + field_ + '.' + plot_format);
+    if (abs_ == 'time'):
+        pyplot.savefig(out_path+"Images/monitoringPoints/" + data.history[20:] + "_"  + abs_ + field_ + '.' + plot_format);
+    else:
+        pyplot.savefig(out_path+"Images/Lines/" + data.history[20:-4] + "_"  + abs_ + field_ + '.' + plot_format);
     pyplot.close("all") 
     return
 
@@ -401,14 +410,14 @@ def plot_dft(dft_point_,field_,scale_factor,out_path,plot_format = "png"):
 
     pyplot.figure(figsize=(2*scale_factor,1.2*scale_factor));
     
-    if field_ == "U":
-        y = 2.0/len(dft_point_.time) * numpy.abs(dft_point_.field.U[0:len(dft_point_.time)][1:])
+    if field_ == "u":
+        y = 2.0/len(dft_point_.time) * numpy.abs(dft_point_.field.u[0:len(dft_point_.time)][1:])
         pyplot.ylabel('Amplitude X-Velocity [-]')
-    elif field_ == "V":
-        y = 2.0/len(dft_point_.time) * numpy.abs(dft_point_.field.V[0:len(dft_point_.time)][1:])
+    elif field_ == "v":
+        y = 2.0/len(dft_point_.time) * numpy.abs(dft_point_.field.v[0:len(dft_point_.time)][1:])
         pyplot.ylabel('Amplitude Y-Velocity [-]')
-    elif field_ == "W":
-        y = 2.0/len(dft_point_.time) * numpy.abs(dft_point_.field.W[0:len(dft_point_.time)][1:])
+    elif field_ == "w":
+        y = 2.0/len(dft_point_.time) * numpy.abs(dft_point_.field.w[0:len(dft_point_.time)][1:])
         pyplot.ylabel('Amplitude Z-Velocity [-]')
     elif field_ == "P":
         y = 2.0/len(dft_point_.time) * numpy.abs(dft_point_.field.P[0:len(dft_point_.time)][1:])
@@ -426,22 +435,22 @@ def plot_dft(dft_point_,field_,scale_factor,out_path,plot_format = "png"):
     
     delta=1e-15
     
-    #x_ticks = numpy.arange(min(x), max(x)/2, (max(x)/2-min(x))/10)
-    #x_ticks = numpy.arange(0 , 2 , 0.2)
-    #y_ticks = numpy.arange(min(y), max(y)+delta, (max(y)-min(y))/10)
+    x_ticks = numpy.arange(min(x), max(x)/2, (max(x)/2-min(x))/10)
+    x_ticks = numpy.arange(0 , 4 , 0.2)
+    y_ticks = numpy.arange(min(y), max(y)+delta, (max(y)-min(y)+delta)/10)
     
     #x,y = zip(*sorted(zip(x,y)))   
 
-    #pyplot.xlim(0,2)
-    pyplot.xlim([min(x),max(x)/2])
+    pyplot.xlim(0,4)
+    #pyplot.xlim([min(x),max(x)/2])
     pyplot.ylim([min(y)*1.1,max(y)*1.1])
     pyplot.xticks(x_ticks, rotation=0)
     pyplot.yticks(y_ticks)
     pyplot.grid()
-    pyplot.loglogy(x, y,
+    pyplot.plot(x, y,
                 color='black',
                 ls='-',
                 lw=1)    
-    pyplot.savefig(out_path+'Images/'+ dft_point_.history + field_ +'.' + plot_format)
+    pyplot.savefig(out_path+'Images/monitoringPoints/'+ dft_point_.history[20:] + field_ +'.' + plot_format)
     pyplot.close("all") 
     return
