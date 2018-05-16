@@ -272,9 +272,9 @@ def monitoring_point(mp_data,mp_,nmp_,t0_):
     point_aux.time = mp_data.time[mp_::nmp_][i:]
     
     
-    point_aux.field.U = mp_data.field.U[mp_::nmp_][i:]
-    point_aux.field.V = mp_data.field.V[mp_::nmp_][i:]
-    point_aux.field.W = mp_data.field.W[mp_::nmp_][i:]
+    point_aux.field.u = mp_data.field.u[mp_::nmp_][i:]
+    point_aux.field.v = mp_data.field.v[mp_::nmp_][i:]
+    point_aux.field.w = mp_data.field.w[mp_::nmp_][i:]
     point_aux.field.P = mp_data.field.P[mp_::nmp_][i:]
     point_aux.field.T = mp_data.field.T[mp_::nmp_][i:]
     
@@ -342,9 +342,9 @@ def smooth_data(data,N):
     #smooth_data_out.field.P = data.field.P[N:][:-N] - numpy.convolve(data.field.P,window,'same')[N:][:-N]
     #smooth_data_out.field.T = data.field.T[N:][:-N] - numpy.convolve(data.field.T,window,'same')[N:][:-N]
 
-    smooth_data_out.field.U = data.field.U - numpy.average(data.field.U)
-    smooth_data_out.field.V = data.field.V - numpy.average(data.field.V)
-    smooth_data_out.field.W = data.field.W - numpy.average(data.field.W)
+    smooth_data_out.field.u = data.field.u - numpy.average(data.field.u)
+    smooth_data_out.field.v = data.field.v - numpy.average(data.field.v)
+    smooth_data_out.field.w = data.field.w - numpy.average(data.field.w)
     smooth_data_out.field.P = data.field.P - numpy.average(data.field.P)
     smooth_data_out.field.T = data.field.T - numpy.average(data.field.T)
 
@@ -393,9 +393,9 @@ def dft_monitoring_point(point_):
     point_aux = volume() 
     
     x = numpy.linspace(min(point_.time), max(point_.time) , len(point_.time))
-    U_interp = interp1d(x, point_.field.U ) 
-    V_interp = interp1d(x, point_.field.V )
-    W_interp = interp1d(x, point_.field.W )
+    U_interp = interp1d(x, point_.field.u ) 
+    V_interp = interp1d(x, point_.field.v )
+    W_interp = interp1d(x, point_.field.w )
     P_interp = interp1d(x, point_.field.P )
     T_interp = interp1d(x, point_.field.T )
     
@@ -404,9 +404,9 @@ def dft_monitoring_point(point_):
     point_aux.history = point_.history + "_dft"
 
     point_aux.time = x
-    point_aux.field.U = scipy.fftpack.fft(U_interp.y)
-    point_aux.field.V = scipy.fftpack.fft(V_interp.y)
-    point_aux.field.W = scipy.fftpack.fft(W_interp.y)
+    point_aux.field.u = scipy.fftpack.fft(U_interp.y)
+    point_aux.field.v = scipy.fftpack.fft(V_interp.y)
+    point_aux.field.w = scipy.fftpack.fft(W_interp.y)
     point_aux.field.P = scipy.fftpack.fft(P_interp.y)
     point_aux.field.T = scipy.fftpack.fft(T_interp.y)
     
